@@ -4,20 +4,42 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
+const foldersRouter = require('./folders/folders-router');
+const notesRouter = require('./notes/notes-router');
 
 const app = express();
+
+app.use(cors());
+
+app.use(function validateBearerToken(req, res, next) {
+    const apiToken = process.env.API_TOKEN;
+    const authToken = req.get('Authorization');
+
+    console.log(authToken);
+    console.log(apiToken);
+
+    if(!authToken || authToken.split(' ')[1] !== apiToken) {
+        return res.status(401).json({ error: 'Unauthorized request' })
+    }
+
+    next();
+
+})
 
 const morganOption = (NODE_ENV === 'production')
     ? 'tiny'
     : 'common';
 
 app.use(morgan(morganOption));
-app.use(cors());
+
 app.use(helmet());
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')
 })
+
+app.use(foldersRouter);
+app.use(notesRouter);
 
 app.use(function errorHandler(error, req, res, next) {
     let response
