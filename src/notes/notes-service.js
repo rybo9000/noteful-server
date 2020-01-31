@@ -17,6 +17,12 @@ const notesService = {
             .select('*')
             .from('notes')
             .where({ 'id': id})
+    },
+    deleteNote(knex, id) {
+        return knex('notes')
+        .where({ id })
+        .delete()
+            
     }
 }
 
